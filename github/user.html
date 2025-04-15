@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Felhasználó</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Felhasználói Adatlap</h1>
+        <div id="user-profile" class="card"></div>
+    </div>
+
+    <script>
+        async function fetchUserData() {
+            const params = new URLSearchParams(window.location.search);
+            const username = params.get('id');
+            if (!username) {
+                document.getElementById('user-profile').innerHTML = '<p>Nincs megadva felhasználónév.</p>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`https://api.github.com/users/${username}`);
+                if (!response.ok) throw new Error("Felhasználó nem található.");
+                
+                const user = await response.json();
+                const userProfile = document.getElementById('user-profile');
+                userProfile.innerHTML = `
+                    <img src="${user.avatar_url}" width="150" class="avatar" alt="${user.name || user.login}">
+                    <h2>${user.name || user.login}</h2>
+                    ${user.bio ? `<p>${user.bio}</p>` : ''}
+                    ${user.location ? `<p><strong>Helyszín:</strong> ${user.location}</p>` : ''}
+                    ${user.blog ? `<p><a href="${user.blog}" target="_blank">${user.blog}</a></p>` : ''}
+                    <p><strong>Publikus repók:</strong> ${user.public_repos}</p>
+                    <p><strong>Követők:</strong> ${user.followers}</p>
+                `;
+            } catch (error) {
+                document.getElementById('user-profile').innerHTML = '<p>Hiba történt az adatok betöltésekor.</p>';
+            }
+        }
+        
+        fetchUserData();
+    </script>
+</body>
+</html>
